@@ -72,15 +72,15 @@ define(['etc/eventDispatcher'], function (eventDispatcher) {
             this._isValidAction(action);
             return eventDispatcher.prototype.on.call(this, fullEventName(action, result), fn);
         },
-        un: function (action, result, fn) {
+        off: function (action, result, fn) {
             this._isValidAction(action);
-            return eventDispatcher.prototype.un.call(this, fullEventName(action, result), fn);
+            return eventDispatcher.prototype.off.call(this, fullEventName(action, result), fn);
         },
         pull: function (type, fn) {
             return eventDispatcher.prototype.on.call(this, fullPulltopName(type), fn);
         },
         unpull: function (type, fn) {
-            return eventDispatcher.prototype.un.call(this, fullPulltopName(type), fn);
+            return eventDispatcher.prototype.off.call(this, fullPulltopName(type), fn);
         },
 
         /**
