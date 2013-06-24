@@ -5,120 +5,169 @@
  *  @data:     結果に伴うデータ(なくてもいい、自由)
  *  @push:     アプリケーショングローバルな通知, pullでバインド
  */
-define(['libs/eventdispatcher'], function (eventDispatcher) {
-    $.extend(comm.prototype, eventDispatcher.prototype, {
-        /**
-         *  net definition
-         */
-        _url:       '',
-        _actions:   {}, // define: method[, verzuim]
+define([], function () {
+    /**
+     *  define event dispatcher
+     */
+	$.extend(eventDispatcher.prototype, {
+		/**
+		 *  register event
+		 */
+		on: function (event, fn) {
+			this._events[event] = this._events[event] || [];
+			if ( ! this.has(event, fn)) {
+				this._events[event].push(fn);
+			}
+		},
 
-        /**
-         *  ajax methods
-         */
-        doen: function (action, callbacks) {
-            this._isValidAction(action);
+		/**
+		 *  unregister event
+		 */
+		off: function (event, fn) {
+			this._events[event] && (this._events[event] = $.grep(this._events[event], function (elm) {
+				return elm != fn;
+			}));
+		},
 
-            var that = this;
-            $.ajax({
-                url: this._url + '/' + action,
-                data: this._data[action],
-                dataType: 'json',
-                type: this._actions[action].method,
-                success: function (r) {
-                    var query = {data: r.data, messages: r.messages};
+		/**
+		 *  check event
+		 */
+		has: function (event, fn) {
+			return this._events[event] && $.inArray(fn, this._events[event]) != -1;
+		},
 
-                    // defalut mode
-                    that.fire(fullEventName(action, r.result), query);
-
-                    // raw mode
-                    if (callbacks && callbacks[r.result]) {
-                        callbacks[r.result](query);
-                    }
-
-                    // pull
-                    if (r.push) {
-                        $.each(r.push, function (k, v) {
-                            that.fire(fullPulltopName(k), v);
-                        })
-                    }
-                },
-                error: function () {
-                    // TODO: handle error
-                }
-            });
-        },
-
-        /**
-         *  query manager
-         */
-        reset: function (action) {
-            this._isValidAction(action);
-            this._data[action] = $.extend(true, {}, this._actions[action].verzuim);
-        },
-        set: function (action, key, val) {
-            this._isValidAction(action);
-            this._data[action][key] = val;
-        },
-        unset: function (action, key) {
-            this._isValidAction(action);
-            delete this._data[action][key];
-        },
-
-        /**
-         *  customize bind
-         */
-        on: function (action, result, fn) {
-            this._isValidAction(action);
-            return eventDispatcher.prototype.on.call(this, fullEventName(action, result), fn);
-        },
-        off: function (action, result, fn) {
-            this._isValidAction(action);
-            return eventDispatcher.prototype.off.call(this, fullEventName(action, result), fn);
-        },
-        pull: function (type, fn) {
-            return eventDispatcher.prototype.on.call(this, fullPulltopName(type), fn);
-        },
-        unpull: function (type, fn) {
-            return eventDispatcher.prototype.off.call(this, fullPulltopName(type), fn);
-        },
-
-        /**
-         * utils
-         */
-        _isValidAction: function (action) {
-            if (!this._actions.hasOwnProperty(action)) {
-                throw "action: " + action + " isn't defined";
-            }
-        }
-    });
-
-    return comm;
+		/**
+		 *  fire
+		 */
+		fire: function (event, data) {
+			var that = this;
+			this._events[event] && $.each(this._events[event], function (i, fn) {
+				fn.call(that, data);
+			});
+		}
+	});
 
     /**
-     *  class
+     *  define comm
+     *  extends event dispatcher
      */
-    function comm() {
-        var that = this;
+	$.extend(comm.prototype, eventDispatcher.prototype, {
+		/**
+		 *  net definition
+		 */
+		_url:       '',
+		_actions:   {}, // define: method[, verzuim]
 
-        // init data
-        this._data = {};
-        $.each(this._actions, function (name, v) {
-            that.reset(name);
-        });
+		/**
+		 *  ajax methods
+		 */
+		doen: function (action, callbacks) {
+			this._isValidAction(action);
 
-        eventDispatcher.apply(this, arguments);
-    }
+			var that = this;
+			$.ajax({
+				url: this._url + '/' + action,
+				data: this._data[action],
+				dataType: 'json',
+				type: this._actions[action].method,
+				success: function (r) {
+					var query = {data: r.data, messages: r.messages};
 
-    /**
-     *  templates
-     */
-    // get event names
-    function fullEventName(action, result) {
-        return "action:" + action + "." + result;
-    }
-    // also get event names
-    function fullPulltopName(type) {
-        return "pull:" + type;
-    }
+					// defalut mode
+					that.fire(fullEventName(action, r.result), query);
+
+					// raw mode
+					if (callbacks && callbacks[r.result]) {
+						callbacks[r.result](query);
+					}
+
+					// pull
+					if (r.push) {
+						$.each(r.push, function (k, v) {
+							that.fire(fullPulltopName(k), v);
+						})
+					}
+				},
+				error: function () {
+					// TODO: handle error
+				}
+			});
+		},
+
+		/**
+		 *  query manager
+		 */
+		reset: function (action) {
+			this._isValidAction(action);
+			this._data[action] = $.extend(true, {}, this._actions[action].verzuim);
+		},
+		set: function (action, key, val) {
+			this._isValidAction(action);
+			this._data[action][key] = val;
+		},
+		unset: function (action, key) {
+			this._isValidAction(action);
+			delete this._data[action][key];
+		},
+
+		/**
+		 *  customize bind
+		 */
+		on: function (action, result, fn) {
+			this._isValidAction(action);
+			return eventDispatcher.prototype.on.call(this, fullEventName(action, result), fn);
+		},
+		off: function (action, result, fn) {
+			this._isValidAction(action);
+			return eventDispatcher.prototype.off.call(this, fullEventName(action, result), fn);
+		},
+		pull: function (type, fn) {
+			return eventDispatcher.prototype.on.call(this, fullPulltopName(type), fn);
+		},
+		unpull: function (type, fn) {
+			return eventDispatcher.prototype.off.call(this, fullPulltopName(type), fn);
+		},
+
+		/**
+		 * utils
+		 */
+		_isValidAction: function (action) {
+			if (!this._actions.hasOwnProperty(action)) {
+				throw "action: " + action + " isn't defined";
+			}
+		}
+	});
+
+	return comm;
+
+	/**
+	 *  class
+	 */
+	function eventDispatcher() {
+		this._events = {};
+	}
+	function comm() {
+		var that = this;
+
+		// init data
+		this._data = {};
+		$.each(this._actions, function (name, v) {
+			that.reset(name);
+		});
+
+		eventDispatcher.apply(this, arguments);
+	}
+
+	/**
+	 *  templates
+	 */
+	// get event names
+	function fullEventName(action, result) {
+		return "action:" + action + "." + result;
+	}
+	// also get event names
+	function fullPulltopName(type) {
+		return "pull:" + type;
+	}
 });
+
