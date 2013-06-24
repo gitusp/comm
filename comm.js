@@ -5,7 +5,7 @@
  *  @data:     結果に伴うデータ(なくてもいい、自由)
  *  @push:     アプリケーショングローバルな通知, pullでバインド
  */
-define(['etc/eventDispatcher'], function (eventDispatcher) {
+define(['etc/eventdispatcher'], function (eventDispatcher) {
     $.extend(comm.prototype, eventDispatcher.prototype, {
         /**
          *  net definition
