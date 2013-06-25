@@ -3,7 +3,7 @@ net protocol
 @result:	結果
 @messages:	結果に伴うメッセージ(なくてもいい)
 @data:		結果に伴うデータ(なくてもいい、自由)
-@push:		アプリケーショングローバルな通知, pullでバインド
+@push:		アプリケーショングローバルな通知, pullでバインド(push名とデータのkey-value)
 ###
 define [], ->
 	###
@@ -23,7 +23,7 @@ define [], ->
 				elm for elm in @_events[event] when elm isnt fn
 
 		has: (event, fn) ->
-			return unless @_events[event]?
+			return false unless @_events[event]?
 			fn in @_events[event]
 
 		fire: (event, data) ->
@@ -107,7 +107,7 @@ define [], ->
 		utils
 		###
 		_isValidAction: (action) ->
-			throw "action: #{action} isn't defined"  unless @_actions.hasOwnProperty(action)
+			throw "action: #{action} isn't defined" unless @_actions.hasOwnProperty(action)
 	
 	###
 	templates

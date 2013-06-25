@@ -4,7 +4,7 @@ net protocol
 @result:	結果
 @messages:	結果に伴うメッセージ(なくてもいい)
 @data:		結果に伴うデータ(なくてもいい、自由)
-@push:		アプリケーショングローバルな通知, pullでバインド
+@push:		アプリケーショングローバルな通知, pullでバインド(push名とデータのkey-value)
 */
 
 
@@ -54,7 +54,7 @@ net protocol
 
       EventDispatcher.prototype.has = function(event, fn) {
         if (this._events[event] == null) {
-          return;
+          return false;
         }
         return __indexOf.call(this._events[event], fn) >= 0;
       };

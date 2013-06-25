@@ -16,7 +16,7 @@
       return comm = new TestComm;
     });
     describe('CommTest', function() {
-      return describe('イベントの付け外し', function() {
+      describe('イベントの付け外し', function() {
         it('ちゃんとつくか', function(done) {
           comm.on('success', 'success', function() {
             return done();
@@ -57,8 +57,94 @@
             return assert(false);
           };
           comm.on('success', 'success', onComplete);
-          comm.off('success', 'success', onComplete);
           comm.on('success', 'success', function() {
+            return done();
+          });
+          comm.off('success', 'success', onComplete);
+          return comm.doen('success');
+        });
+      });
+      describe('pullのつけはずし', function() {
+        it('ちゃんとつくか', function(done) {
+          comm.pull('token', function() {
+            return done();
+          });
+          return comm.doen('success');
+        });
+        it('重複してつかないか', function(done) {
+          var cnt, onComplete;
+          cnt = 0;
+          onComplete = function() {
+            cnt++;
+            if (cnt > 1) {
+              return assert(false);
+            }
+          };
+          comm.pull('token', onComplete);
+          comm.pull('token', onComplete);
+          comm.pull('token', function() {
+            return done();
+          });
+          return comm.doen('success');
+        });
+        it('つけわけができるか1', function(done) {
+          comm.pull('token', function() {
+            return done();
+          });
+          comm.pull('csrf', function() {
+            return assert(false);
+          });
+          return comm.doen('success');
+        });
+        it('つけわけができるか2', function(done) {
+          comm.pull('token', function() {
+            return assert(false);
+          });
+          comm.pull('csrf', function() {
+            return done();
+          });
+          return comm.doen('failure');
+        });
+        return it('正常にはずせるか', function(done) {
+          var cnt, onComplete, onPull;
+          cnt = 0;
+          onComplete = function() {
+            return assert(false);
+          };
+          onPull = function() {
+            cnt++;
+            if (cnt > 1) {
+              return done();
+            }
+          };
+          comm.pull('token', onComplete);
+          comm.pull('csrf', onComplete);
+          comm.pull('csrf', onPull);
+          comm.pull('token', onPull);
+          comm.unpull('csrf', onComplete);
+          comm.unpull('token', onComplete);
+          comm.doen('success');
+          return comm.doen('failure');
+        });
+      });
+      return describe('通信プロトコル', function() {
+        it('data', function(done) {
+          comm.on('success', 'success', function(query) {
+            assert(query.data === 'user_info');
+            return done();
+          });
+          return comm.doen('success');
+        });
+        it('messages', function(done) {
+          comm.on('failure', 'failure', function(query) {
+            assert(query.messages.email === 'invalid');
+            return done();
+          });
+          return comm.doen('failure');
+        });
+        return it('pull', function(done) {
+          comm.pull('token', function(newToken) {
+            assert(newToken === 'abcdef');
             return done();
           });
           return comm.doen('success');
