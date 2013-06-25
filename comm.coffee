@@ -91,17 +91,17 @@ define [], ->
 		###
 		on: (action, result, fn) ->
 			@_isValidAction action
-			super.on fullEventName(action, result), fn
+			_super::on.call @, fullEventName(action, result), fn
 
 		off: (action, result, fn) ->
 			@_isValidAction action
-			super.off fullEventName(action, result), fn
+			_super::off.call @, fullEventName(action, result), fn
 
 		pull: (type, fn) ->
-			super.on fullPulltopName(type), fn
+			_super::on.call @, fullPulltopName(type), fn
 
 		unpull: (type, fn) ->
-			super.off fullPulltopName(type), fn
+			_super::off.call @, fullPulltopName(type), fn
 
 		###
 		utils

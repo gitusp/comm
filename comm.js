@@ -170,20 +170,20 @@ net protocol
 
       Comm.prototype.on = function(action, result, fn) {
         this._isValidAction(action);
-        return Comm.__super__.on.apply(this, arguments).on(fullEventName(action, result), fn);
+        return _super.prototype.on.call(this, fullEventName(action, result), fn);
       };
 
       Comm.prototype.off = function(action, result, fn) {
         this._isValidAction(action);
-        return Comm.__super__.off.apply(this, arguments).off(fullEventName(action, result), fn);
+        return _super.prototype.off.call(this, fullEventName(action, result), fn);
       };
 
       Comm.prototype.pull = function(type, fn) {
-        return Comm.__super__.pull.apply(this, arguments).on(fullPulltopName(type), fn);
+        return _super.prototype.on.call(this, fullPulltopName(type), fn);
       };
 
       Comm.prototype.unpull = function(type, fn) {
-        return Comm.__super__.unpull.apply(this, arguments).off(fullPulltopName(type), fn);
+        return _super.prototype.off.call(this, fullPulltopName(type), fn);
       };
 
       /*
